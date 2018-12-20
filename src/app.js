@@ -1,6 +1,6 @@
 import '@tarojs/async-await'
 import Taro, { Component } from '@tarojs/taro'
-import { Provider } from '@tarojs/redux'
+import { Provider, connect } from '@tarojs/redux'
 
 import dva from './utils/dva'
 import models from './models'
@@ -16,6 +16,9 @@ const dvaApp = dva.createApp({
 });
 const store = dvaApp.getStore();
 
+@connect(({common}) => ({
+  ...common
+}))
 class App extends Component {
 
   config = {
@@ -23,6 +26,14 @@ class App extends Component {
       'pages/index/index',
       'pages/about/index',
       'pages/mine/index'
+    ],
+    subPackages: [
+      {
+        root: 'subpackage',
+        pages: [
+          'pages/pic'
+        ]
+      }
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -33,25 +44,27 @@ class App extends Component {
     tabBar: {
       list: [{
         pagePath: "pages/index/index",
-        iconPath: "./images/tab/home.png",
-        selectedIconPath: "./images/tab/home-active.png"
       }, {
         pagePath: "pages/about/index",
-        iconPath: "./images/tab/cart.png",
-        selectedIconPath: "./images/tab/cart-active.png"
       },{
         pagePath: "pages/mine/index",
-        iconPath: "./images/tab/user.png",
-        selectedIconPath: "./images/tab/user-active.png"
       }],
-      color: '#333',
-      selectedColor: '#333',
-      backgroundColor: '#fff',
-      borderStyle: '#ccc'
+      backgroundColor: '#fff'
     }
   }
 
-  componentDidMount () {}
+
+  componentDidMount () {
+    Taro.getUserInfo().then(({ userInfo }) => {
+      this.props.dispatch({
+        type: 'common/setUserInfo',
+        payload: userInfo
+      })
+    })
+    /*隐藏自带tabbar*/
+    Taro.hideTabBar();
+
+  }
 
   componentDidShow () {}
 
